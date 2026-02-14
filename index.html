@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Semina’s Valentine 💘</title>
+
+  <meta name="theme-color" content="#ff4fa3" />
+  <link rel="manifest" href="manifest.webmanifest" />
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #0b0b12;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      overflow: hidden;
+    }
+
+    .wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 12px;
+    }
+
+    canvas {
+      width: min(430px, 100%);
+      aspect-ratio: 390 / 750;
+      height: auto;
+
+      border-radius: 18px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.45);
+
+      touch-action: none;
+
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    * { -webkit-tap-highlight-color: transparent; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <canvas id="game" width="390" height="750" aria-label="Catch the hearts game"></canvas>
+  </div>
+
+  <script src="game.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));
+    }
+  </script>
+</body>
+</html>
