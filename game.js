@@ -308,7 +308,7 @@
     const progress = 1 - (timeLeft / DURATION);
 
     // Bigger hearts on mobile feel
-    const heartSize = rand(52, 78); // ✅ bigger and clearer on phones
+   const heartSize = rand(30, 44);  // ✅ bigger and clearer on phones
 
     // Falling speed ramps up
     const baseVy = 150 + progress * 140;
@@ -717,8 +717,9 @@
       h.y += h.vy * dt;
 
       // collision (based on size)
-      const hitX = h.size * 0.80;
-      const hitY = h.size * 0.55;
+      const hitX = h.size * 1.15;
+      const hitY = h.size * 0.85;
+
       const dx = Math.abs(h.x - player.x);
       const dy = Math.abs(h.y - catchY);
 
