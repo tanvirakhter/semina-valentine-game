@@ -19,7 +19,6 @@
 }
 
 *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
-
 html,body{
   height:100%;
   margin:0;
@@ -52,13 +51,13 @@ html,body{
 .topGlow{
   position:absolute;
   inset:-60px -60px auto -60px;
-  height:220px;
+  height:240px;
   background: radial-gradient(circle at 50% 40%, rgba(255,79,163,.26), transparent 60%);
   pointer-events:none;
 }
 
 header{
-  padding:22px 18px 8px;
+  padding:22px 18px 10px;
   text-align:center;
   position:relative;
   z-index:1;
@@ -83,28 +82,45 @@ h1{
 }
 
 .sub{
-  margin:0 auto 6px;
+  margin:0 auto 10px;
   max-width:34ch;
   color:var(--muted);
   font-weight:600;
   font-size:14px;
 }
 
-/* ⭐ Your character animation */
+/* ⭐ Character block + fixed gradient behind */
 @keyframes spriteFloat {
   0%   { transform: translateY(0) rotate(-1deg); }
   50%  { transform: translateY(-8px) rotate(1deg); }
   100% { transform: translateY(0) rotate(-1deg); }
 }
 
-.avatarWrap{
+.heroChar{
   display:flex;
   justify-content:center;
-  margin-top:6px;
+  margin-top: 4px;
+  margin-bottom: 10px;
+  position: relative;
 }
 
-.avatarWrap img{
-  width:140px;           /* adjust size here */
+.heroChar::before{
+  content:"";
+  position:absolute;
+  width: 240px;
+  height: 160px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -48%);
+  background:
+    radial-gradient(circle at 50% 55%, rgba(255,79,163,.26), rgba(255,79,163,.06) 55%, transparent 75%),
+    radial-gradient(circle at 48% 52%, rgba(130,120,255,.18), transparent 70%);
+  filter: blur(6px);
+  pointer-events:none;
+}
+
+.heroChar img{
+  width: 150px;            /* bigger */
   height:auto;
   display:block;
   image-rendering: pixelated;
@@ -113,14 +129,16 @@ h1{
   animation: spriteFloat 2.4s ease-in-out infinite;
   transform-origin: 50% 85%;
   will-change: transform;
+  position: relative;
+  z-index: 1;
 }
 
 @media (prefers-reduced-motion: reduce){
-  .avatarWrap img{ animation: none; }
+  .heroChar img{ animation: none; }
 }
 
 .content{
-  padding:10px 16px 18px;
+  padding: 6px 16px 18px;
   display:flex;
   flex-direction:column;
   gap:12px;
@@ -139,7 +157,14 @@ h1{
 .cardTitle{
   display:flex;
   justify-content:space-between;
+  align-items:center;
+  gap: 10px;
   margin-bottom:10px;
+}
+
+.cardTitle strong{
+  font-size: 18px;
+  letter-spacing: -0.01em;
 }
 
 .pill{
@@ -154,8 +179,9 @@ h1{
 .type{
   font-size:15px;
   line-height:1.55;
-  min-height:92px;
+  min-height:108px;
   white-space:pre-wrap;
+  color: rgba(255,255,255,.90);
 }
 
 .hint{
@@ -169,7 +195,7 @@ h1{
 .btnRow{
   display:flex;
   gap:10px;
-  margin-top:8px;
+  margin-top:10px;
 }
 
 button{
@@ -184,82 +210,43 @@ button{
   border:1px solid rgba(255,255,255,.14);
   transition: transform .08s ease;
 }
-
 button:active{ transform: scale(.98); }
 
 .primary{
   background: linear-gradient(135deg,var(--pink),var(--pink2));
+  border: 1px solid rgba(255,79,163,.55);
 }
 
 .final{
   text-align:center;
-  padding:18px 16px 22px;
+  padding:18px 16px 20px;
+}
+
+.final h3{
+  margin: 0 0 8px;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+
+.final p{
+  margin: 0 0 12px;
+  color: rgba(255,255,255,.84);
+  font-weight: 650;
 }
 
 .small{
   font-size:12px;
   color:rgba(255,255,255,.65);
   text-align:center;
-  padding-bottom:18px;
+  padding-bottom:10px;
 }
 
-/* ❤️ Final Love Screen */
-.loveScreen{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.92);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .6s ease;
-  z-index:999;
-}
+/* hidden utility */
+.hidden{ display:none !important; }
 
-.loveScreen.show{
-  opacity:1;
-  pointer-events:auto;
-}
-
-.loveScreen img{
-  width:260px;
-  max-width:86%;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  filter: drop-shadow(0 18px 30px rgba(0,0,0,.55));
-  margin-bottom:18px;
-  animation: popIn .6s ease forwards;
-}
-
-.loveText{
-  font-size:30px;
-  font-weight:900;
-  color:#ff4fa3;
-  opacity:0;
-  animation: fadeIn 1.2s ease forwards .45s;
-  text-align:center;
-  letter-spacing:-0.01em;
-}
-
-.loveHint{
-  margin-top:10px;
-  font-size:12px;
-  font-weight:700;
-  color:rgba(255,255,255,.65);
-  opacity:0;
-  animation: fadeIn 1.2s ease forwards .8s;
-}
-
-@keyframes popIn{
-  from{ transform:scale(.72); opacity:0;}
-  to{ transform:scale(1); opacity:1;}
-}
-
-@keyframes fadeIn{
-  from{ opacity:0; transform:translateY(10px);}
-  to{ opacity:1; transform:translateY(0);}
+/* Bottom back button bar */
+.bottomBar{
+  margin-top: 2px;
 }
 </style>
 </head>
@@ -274,36 +261,41 @@ button:active{ transform: scale(.98); }
       <h1>Semina, this is for you</h1>
       <p class="sub">Made with love — and a little bit of code 😌</p>
 
-      <div class="avatarWrap">
+      <div class="heroChar">
         <img src="tanvir.png" alt="Tanvir">
       </div>
     </header>
 
     <div class="content">
-      <div class="card">
+
+      <!-- Letter card -->
+      <div class="card" id="letterCard">
         <div class="cardTitle">
           <strong>💌 A little note</strong>
-          <span class="pill" id="pill">Tap to type</span>
+          <span class="pill" id="pill">Tap to start</span>
         </div>
 
         <div class="type" id="type"></div>
 
         <div class="btnRow">
           <button id="typeBtn" class="primary">Start the Letter ✨</button>
-          <button id="skipBtn">Skip</button>
         </div>
 
         <div class="hint">Tip: turn your volume up 🎵</div>
       </div>
 
-      <div class="card final">
+      <!-- Question card (hidden until letter finishes) -->
+      <div class="card final hidden" id="questionCard">
         <h3>So… one question 😌</h3>
         <p>Will you be my Valentine? 💖</p>
-
         <div class="btnRow">
           <button class="primary" id="yesBtn">YES 💘</button>
-          <button id="backBtn">Back to game</button>
         </div>
+      </div>
+
+      <!-- Back button at bottom -->
+      <div class="bottomBar">
+        <button id="backBtn">Back to game</button>
       </div>
 
       <div class="small">Made with ❤️</div>
@@ -311,11 +303,18 @@ button:active{ transform: scale(.98); }
   </div>
 </div>
 
-<!-- ❤️ FINAL LOVE SCREEN (shows after YES) -->
-<div class="loveScreen" id="loveScreen" aria-hidden="true">
-  <img src="together.png" alt="Together">
-  <div class="loveText">I love you ❤️</div>
-  <div class="loveHint">Tap anywhere to close</div>
+<!-- ❤️ FINAL LOVE SCREEN -->
+<div class="loveScreen" id="loveScreen" aria-hidden="true" style="
+  position:fixed; inset:0; background:rgba(0,0,0,.92);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity .6s ease; z-index:999;">
+  <img src="together.png" alt="Together" style="
+    width:260px; max-width:86%;
+    image-rendering:pixelated; image-rendering:crisp-edges;
+    filter:drop-shadow(0 18px 30px rgba(0,0,0,.55));
+    margin-bottom:18px;">
+  <div style="font-size:30px; font-weight:900; color:#ff4fa3; text-align:center;">I love you ❤️</div>
+  <div style="margin-top:10px; font-size:12px; font-weight:700; color:rgba(255,255,255,.65);">Tap anywhere to close</div>
 </div>
 
 <script>
@@ -333,14 +332,10 @@ function startMusic(){
 const letter = `Hey Semina,
 
 I made this little game because you make life feel lighter.
-
-Every heart you caught is something I genuinely feel about you.
-
 Every heart you caught is something I genuinely feel about you.
 
 Thank you for being you —
 for your kindness, your patience, and your warmth.
-
 I’m proud of you, and I’m grateful you’re in my life.
 
 Happy Valentine’s Day 💖
@@ -349,50 +344,67 @@ Happy Valentine’s Day 💖
 
 const typeEl = document.getElementById("type");
 const pill = document.getElementById("pill");
+const typeBtn = document.getElementById("typeBtn");
+
+const questionCard = document.getElementById("questionCard");
 
 let i=0, timer=null, done=false, typing=false;
+
+function setPill(t){ pill.textContent = t; }
+
+function revealQuestion(){
+  questionCard.classList.remove("hidden");
+  // small scroll nudge on phone so she sees it
+  setTimeout(() => questionCard.scrollIntoView({ behavior:"smooth", block:"nearest" }), 200);
+}
 
 function typeStart(){
   startMusic();
   if (typing || done) return;
   typing = true;
-  pill.textContent="Typing…";
+  setPill("Typing…");
+  typeBtn.disabled = true;
+  typeBtn.textContent = "Writing… 💌";
 
   timer=setInterval(()=>{
-    typeEl.textContent+=letter[i]||"";
+    typeEl.textContent += letter[i] || "";
     i++;
-    if(i>=letter.length){
+    if(i >= letter.length){
       clearInterval(timer);
       typing=false;
       done=true;
-      pill.textContent="Done 💘";
+      setPill("Done 💘");
+      typeBtn.textContent = "Letter finished 💖";
+      revealQuestion();
     }
-  },18);
+  }, 18);
 }
 
-function typeSkip(){
-  startMusic();
-  if (done) return;
-  clearInterval(timer);
-  typeEl.textContent=letter;
-  typing=false;
-  done=true;
-  pill.textContent="Done 💘";
-}
+typeBtn.addEventListener("click", typeStart);
 
-document.getElementById("typeBtn").onclick=typeStart;
-document.getElementById("skipBtn").onclick=typeSkip;
-
+// Back button always at bottom
 document.getElementById("backBtn").onclick=()=>{
   location.href="index.html";
 };
 
-// ❤️ YES => show final love screen + hearts
+// YES => final screen + hearts
 const loveScreen = document.getElementById("loveScreen");
+
+function showLoveScreen(){
+  loveScreen.style.opacity = "1";
+  loveScreen.style.pointerEvents = "auto";
+  loveScreen.setAttribute("aria-hidden","false");
+}
+
+function hideLoveScreen(){
+  loveScreen.style.opacity = "0";
+  loveScreen.style.pointerEvents = "none";
+  loveScreen.setAttribute("aria-hidden","true");
+}
 
 function burstLoveHearts(){
   const emojis = ["💖","💘","💞","💝","✨"];
-  for(let i=0;i<34;i++){
+  for(let k=0;k<34;k++){
     const h=document.createElement("div");
     h.textContent = emojis[Math.floor(Math.random()*emojis.length)];
     h.style.position="fixed";
@@ -415,16 +427,12 @@ function burstLoveHearts(){
 
 document.getElementById("yesBtn").onclick=()=>{
   startMusic();
-  loveScreen.classList.add("show");
-  loveScreen.setAttribute("aria-hidden","false");
+  showLoveScreen();
   burstLoveHearts();
 };
 
-// Tap anywhere on love screen to close it
-loveScreen.addEventListener("pointerdown", ()=>{
-  loveScreen.classList.remove("show");
-  loveScreen.setAttribute("aria-hidden","true");
-});
+// Tap anywhere on love screen to close
+loveScreen.addEventListener("pointerdown", hideLoveScreen);
 
 // Start music on any tap (mobile autoplay rules)
 document.addEventListener("pointerdown", startMusic, { once:true });
