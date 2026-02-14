@@ -5,11 +5,11 @@
   // --- Canvas/game config ---
   const W = canvas.width, H = canvas.height;
   const GROUND_Y = H - 90;
-  const DURATION = 30; // seconds
+  const DURATION = 35; // a bit longer feels nicer
 
-  // Reward-like spawn pacing (not rain)
-  const SPAWN_SLOW = 1150; // ms
-  const SPAWN_FAST = 750;  // ms
+  // Spawn pacing (gets faster over time)
+  const SPAWN_SLOW = 1050; // ms
+  const SPAWN_FAST = 520;  // ms
 
   // Files
   const BG_FILE = "bg.png";
@@ -26,15 +26,23 @@
   const SWAY_AMPLITUDE = 2.0;
   const SWAY_SPEED = 1.2;
 
-  // --- NEW: Petals config ---
+  // Petals
   const PETAL_COUNT = 12;
 
-  // --- NEW: Golden hearts ---
-  const GOLD_CHANCE = 0.14; // 14% rare heart chance
-  const GOLD_BONUS = 2;     // extra points for gold
+  // Rare hearts/powerups
+  const GOLD_CHANCE = 0.14;     // 14%
+  const MAGNET_CHANCE = 0.06;   // 6% rare ⭐
+  const MAGNET_SECONDS = 6.0;
 
-  // --- NEW: Basket fill goal ---
-  const GOAL = 14; // hearts to “fill” (purely visual)
+  // “Addictive” scoring
+  let score = 0;
+  let streak = 0;           // increases multiplier
+  let bestStreak = 0;
+  let multiplier = 1;       // based on streak
+  let magnetTime = 0;       // seconds remaining
+
+  // Goal for basket bar
+  const GOAL = 18;
 
   // Messages
   const CATCH_MESSAGES = [
@@ -49,6 +57,7 @@
     "My heart is yours ❤️"
   ];
   const GOLD_MESSAGE = "✨ GOLD HEART! You’re my forever 💍";
+  const MAGNET_MESSAGE = "⭐ MAGNET MODE! Catch everything 😈💘";
   const MISS_MESSAGE = "No matter what you do, I’ll always love you — even if you fall 💖";
   const WIN_MESSAGE  = "Semina… will you be my Valentine? 💘";
 
@@ -63,8 +72,8 @@
   let lastSpawn = 0;
   let msgIndex = 0;
 
-  // NEW: sparkles particles
   const sparkles = [];
+  const floatTexts = []; // "Nice!", "+20", etc
 
   // toast popup
   let toast = { text: "", t: 0, kind: "catch" }; // catch | miss
@@ -73,7 +82,7 @@
   const player = {
     x: W / 2,
     y: GROUND_Y,
-    speed: 560,
+    speed: 610,  // slightly snappier
     targetX: W / 2,
     prevX: W / 2
   };
@@ -93,7 +102,7 @@
   playerImage.src = SPRITE_FILE;
   playerImage.onload = () => { playerImageLoaded = true; };
 
-  // --- Background music (starts after user interaction) ---
+  // --- Background music ---
   const bgMusic = new Audio(MUSIC_FILE);
   bgMusic.loop = true;
   bgMusic.volume = 0.45;
@@ -114,24 +123,34 @@
     }, 100);
   }
 
-  // --- NEW: Tiny pop sound (no extra file) ---
+  // --- Tiny pop sounds (no extra files) ---
   let audioCtx = null;
-  function popSound(kind = "pink") {
+  function popSound(type = "pink") {
     try {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === "suspended") audioCtx.resume();
 
       const o = audioCtx.createOscillator();
       const g = audioCtx.createGain();
-      o.type = "sine";
 
       const t = audioCtx.currentTime;
-      const base = kind === "gold" ? 880 : 660;
+      o.type = "sine";
+
+      const base =
+        type === "gold" ? 980 :
+        type === "magnet" ? 740 :
+        620;
+
       o.frequency.setValueAtTime(base, t);
       o.frequency.exponentialRampToValueAtTime(base * 0.55, t + 0.08);
 
+      const vol =
+        type === "gold" ? 0.11 :
+        type === "magnet" ? 0.09 :
+        0.07;
+
       g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(kind === "gold" ? 0.09 : 0.06, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
       g.gain.exponentialRampToValueAtTime(0.0001, t + 0.10);
 
       o.connect(g);
@@ -156,33 +175,44 @@
     ctx.closePath();
   }
 
-  // Heart draw
-  function drawHeart(x, y, s, fill="#ff4fa3") {
+  // ✅ NEW: Phone-safe heart shape (pixel-based, no weird scaling)
+  function drawHeartPx(x, y, size, fill, glow = true) {
+    // size is in pixels (bigger = bigger heart)
+    const top = size * 0.30;
     ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(s, s);
 
-    ctx.shadowColor = fill;
-    ctx.shadowBlur = 26;
+    if (glow) {
+      ctx.shadowColor = fill;
+      ctx.shadowBlur = Math.max(10, size * 0.35);
+    }
 
     ctx.beginPath();
-    ctx.moveTo(0, 0.6);
-    ctx.bezierCurveTo(-1.15, -0.2, -0.62, -1.25, 0, -0.65);
-    ctx.bezierCurveTo(0.62, -1.25, 1.15, -0.2, 0, 0.6);
+    ctx.moveTo(x, y + top);
+
+    // left half
+    ctx.bezierCurveTo(x, y, x - size / 2, y, x - size / 2, y + top);
+    ctx.bezierCurveTo(x - size / 2, y + (size + top) / 2, x, y + (size + top) / 2, x, y + size);
+
+    // right half
+    ctx.bezierCurveTo(x, y + (size + top) / 2, x + size / 2, y + (size + top) / 2, x + size / 2, y + top);
+    ctx.bezierCurveTo(x + size / 2, y, x, y, x, y + top);
+
     ctx.closePath();
     ctx.fillStyle = fill;
     ctx.fill();
 
+    // highlight
     ctx.shadowBlur = 0;
-    ctx.globalAlpha = 0.35;
+    ctx.globalAlpha = 0.30;
     ctx.fillStyle = "white";
     ctx.beginPath();
-    ctx.arc(-0.35, -0.35, 0.22, 0, Math.PI*2);
+    ctx.arc(x - size * 0.18, y + size * 0.18, Math.max(2, size * 0.09), 0, Math.PI*2);
     ctx.fill();
 
     ctx.restore();
   }
 
+  // Heart colors
   const HEART_FILLS = {
     pink:   "#ff4fa3",
     gold:   "#ffd36b",
@@ -191,7 +221,7 @@
     mint:   "#52ffd6"
   };
 
-  // NEW: Petals (background alive)
+  // Petals
   const petals = Array.from({ length: PETAL_COUNT }, () => ({
     x: Math.random() * W,
     y: Math.random() * H,
@@ -206,7 +236,6 @@
     ctx.save();
     ctx.globalAlpha = 0.75;
     ctx.fillStyle = "rgba(255,182,193,0.85)";
-
     for (const p of petals) {
       ctx.save();
       ctx.translate(p.x, p.y);
@@ -216,21 +245,20 @@
       ctx.fill();
       ctx.restore();
     }
-
     ctx.restore();
   }
 
-  // NEW: Sparkles (catch pop)
+  // Sparkles for pops
   function spawnSparkles(x, y, kind) {
-    const count = kind === "gold" ? 16 : 10;
+    const count = kind === "gold" ? 18 : (kind === "magnet" ? 22 : 10);
     for (let i = 0; i < count; i++) {
       sparkles.push({
         x, y,
-        vx: rand(-120, 120),
-        vy: rand(-180, -70),
-        life: rand(0.35, 0.6),
+        vx: rand(-140, 140),
+        vy: rand(-210, -80),
+        life: rand(0.35, 0.75),
         t: 0,
-        r: rand(1.6, 3.2),
+        r: rand(1.6, 3.4),
         kind
       });
     }
@@ -241,7 +269,10 @@
       const a = 1 - (s.t / s.life);
       ctx.save();
       ctx.globalAlpha = a;
-      ctx.fillStyle = s.kind === "gold" ? "rgba(255,230,160,1)" : "rgba(255,255,255,1)";
+      ctx.fillStyle =
+        s.kind === "gold" ? "rgba(255,230,160,1)" :
+        s.kind === "magnet" ? "rgba(180,255,255,1)" :
+        "rgba(255,255,255,1)";
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
       ctx.fill();
@@ -249,20 +280,49 @@
     }
   }
 
-  function spawnHeart() {
-    // Bigger hearts
-    const size = rand(80, 115);
+  function addFloatText(text, x, y, color = "rgba(255,255,255,.95)") {
+    floatTexts.push({ text, x, y, vy: -40, t: 0, life: 0.9, color });
+  }
 
-    // Gentle speed ramp
+  function drawFloatTexts() {
+    for (const f of floatTexts) {
+      const a = 1 - (f.t / f.life);
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.fillStyle = f.color;
+      ctx.font = "900 16px system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText(f.text, f.x, f.y);
+      ctx.restore();
+    }
+  }
+
+  function calcMultiplier() {
+    // every 5 streak adds +0.5 up to 3x
+    const tier = Math.floor(streak / 5);
+    multiplier = clamp(1 + tier * 0.5, 1, 3);
+  }
+
+  // Spawn hearts + powerups
+  function spawnDrop() {
     const progress = 1 - (timeLeft / DURATION);
-    const baseVy = 135 + progress * 95;
-    const vy = rand(baseVy, baseVy + 70);
 
-    // NEW: rare gold hearts
-    const isGold = Math.random() < GOLD_CHANCE;
+    // Bigger hearts on mobile feel
+    const heartSize = rand(52, 78); // ✅ bigger and clearer on phones
 
-    let kind;
-    if (isGold) {
+    // Falling speed ramps up
+    const baseVy = 150 + progress * 140;
+    const vy = rand(baseVy, baseVy + 90);
+
+    // Decide drop type
+    const roll = Math.random();
+    let kind = "pink";
+    let type = "heart"; // heart | magnet
+
+    if (roll < MAGNET_CHANCE) {
+      type = "magnet";
+      kind = "magnet";
+    } else if (roll < MAGNET_CHANCE + GOLD_CHANCE) {
       kind = "gold";
     } else {
       const kinds = ["pink", "purple", "blue", "mint"];
@@ -271,35 +331,46 @@
 
     hearts.push({
       x: rand(44, W - 44),
-      y: -95,
+      y: -110,
       vy,
-      size,
+      size: heartSize, // pixels
       kind,
+      type,
       trail: []
     });
   }
 
   function showToast(text, kind="catch") {
     toast.text = text;
-    toast.t = 1.9;
+    toast.t = 1.8;
     toast.kind = kind;
   }
 
   function resetGame() {
+    score = 0;
+    streak = 0;
+    bestStreak = 0;
+    multiplier = 1;
+    magnetTime = 0;
+
     caught = 0;
     missed = 0;
     timeLeft = DURATION;
+
     hearts.length = 0;
     sparkles.length = 0;
+    floatTexts.length = 0;
+
     lastSpawn = 0;
     msgIndex = 0;
+
     toast = { text:"", t:0, kind:"catch" };
     player.x = W/2;
     player.prevX = W/2;
     player.targetX = W/2;
   }
 
-  // Background cover (no distortion)
+  // Background cover
   function drawBackgroundCover() {
     if (!bgLoaded) return;
 
@@ -331,17 +402,25 @@
       Math.round(drawH)
     );
 
-    // Soft top vignette for readability
+    // soft vignette at top for UI
     ctx.save();
-    const grd = ctx.createLinearGradient(0, 0, 0, 160);
-    grd.addColorStop(0, "rgba(0,0,0,0.35)");
+    const grd = ctx.createLinearGradient(0, 0, 0, 190);
+    grd.addColorStop(0, "rgba(0,0,0,0.38)");
     grd.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, W, 160);
+    ctx.fillRect(0, 0, W, 190);
     ctx.restore();
+
+    // magnet mode tint (subtle)
+    if (magnetTime > 0) {
+      ctx.save();
+      ctx.fillStyle = "rgba(100,255,255,0.06)";
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+    }
   }
 
-  // Draw sprite (no shadow, no distortion)
+  // Sprite
   function drawPlayerSprite(x, y, movingStrength) {
     if (!playerImageLoaded) return;
 
@@ -365,43 +444,55 @@
     ctx.restore();
   }
 
-  // UI
+  // HUD
   function drawTopHUD() {
     // top bar
     ctx.save();
     ctx.globalAlpha = 0.92;
-    ctx.fillStyle = "rgba(0,0,0,.28)";
-    roundedRect(14, 14, W-28, 54, 16);
+    ctx.fillStyle = "rgba(0,0,0,.30)";
+    roundedRect(14, 14, W-28, 66, 16);
     ctx.fill();
 
-    ctx.fillStyle = "rgba(255,255,255,.95)";
-    ctx.font = "700 16px system-ui";
-    ctx.fillText(`💘 Caught: ${caught}`, 28, 46);
+    ctx.fillStyle = "rgba(255,255,255,.96)";
+    ctx.font = "800 14px system-ui";
+    ctx.fillText(`Score: ${score}`, 28, 40);
 
     ctx.textAlign = "center";
-    ctx.fillText(`💔 Missed: ${missed}`, W/2, 46);
+    ctx.fillText(`🔥 Streak: ${streak}  x${multiplier.toFixed(1)}`, W/2, 40);
 
     ctx.textAlign = "right";
-    ctx.fillText(`⏳ ${Math.ceil(timeLeft)}s`, W-28, 46);
+    ctx.fillText(`⏳ ${Math.ceil(timeLeft)}s`, W-28, 40);
+
     ctx.textAlign = "left";
+    ctx.fillStyle = "rgba(255,255,255,.90)";
+    ctx.font = "700 12px system-ui";
+    ctx.fillText(`💘 ${caught}   💔 ${missed}`, 28, 62);
+
+    if (magnetTime > 0) {
+      ctx.textAlign = "right";
+      ctx.fillStyle = "rgba(180,255,255,.95)";
+      ctx.fillText(`⭐ Magnet: ${magnetTime.toFixed(1)}s`, W-28, 62);
+      ctx.textAlign = "left";
+    }
+
     ctx.restore();
 
-    // NEW: basket fill progress
-    const progress = clamp(caught / GOAL, 0, 1);
-    const x = 14, y = 78, w = W - 28, h = 16;
+    // basket fill bar
+    const p = clamp(caught / GOAL, 0, 1);
+    const x = 14, y = 88, w = W - 28, h = 16;
 
     ctx.save();
-    ctx.globalAlpha = 0.90;
+    ctx.globalAlpha = 0.88;
     ctx.fillStyle = "rgba(0,0,0,.22)";
     roundedRect(x, y, w, h, 10);
     ctx.fill();
 
-    ctx.fillStyle = "rgba(255,79,163,.55)";
-    roundedRect(x, y, Math.max(18, w * progress), h, 10);
+    ctx.fillStyle = "rgba(255,79,163,.60)";
+    roundedRect(x, y, Math.max(18, w * p), h, 10);
     ctx.fill();
 
     ctx.fillStyle = "rgba(255,255,255,.92)";
-    ctx.font = "700 12px system-ui";
+    ctx.font = "800 12px system-ui";
     ctx.textAlign = "center";
     ctx.fillText(`Basket: ${Math.min(caught, GOAL)}/${GOAL} 💝`, W/2, y + 12);
     ctx.textAlign = "left";
@@ -410,37 +501,37 @@
 
   function drawToast() {
     if (toast.t <= 0) return;
-    const alpha = clamp(toast.t / 1.9, 0, 1);
+    const alpha = clamp(toast.t / 1.8, 0, 1);
 
     ctx.save();
     ctx.globalAlpha = alpha;
 
     const isMiss = toast.kind === "miss";
-    ctx.fillStyle = isMiss ? "rgba(0,0,0,.34)" : "rgba(255,79,163,.22)";
+    ctx.fillStyle = isMiss ? "rgba(0,0,0,.36)" : "rgba(255,79,163,.22)";
     ctx.strokeStyle = "rgba(255,255,255,.22)";
     ctx.lineWidth = 2;
 
     const padX = 18;
-    ctx.font = "800 15px system-ui";
+    ctx.font = "900 15px system-ui";
     const textW = ctx.measureText(toast.text).width;
-    const boxW = clamp(textW + 2*padX, 260, W-28);
+    const boxW = clamp(textW + 2*padX, 270, W-28);
     const x = (W - boxW)/2;
 
-    roundedRect(x, 108, boxW, 58, 16);
+    roundedRect(x, 114, boxW, 56, 16);
     ctx.fill();
     ctx.stroke();
 
-    ctx.fillStyle = "rgba(255,255,255,.96)";
+    ctx.fillStyle = "rgba(255,255,255,.97)";
     ctx.textAlign = "center";
 
     if (toast.text.length > 42) {
       const mid = toast.text.lastIndexOf(" ", 42);
       const a = toast.text.slice(0, mid);
       const b = toast.text.slice(mid+1);
-      ctx.fillText(a, W/2, 136);
-      ctx.fillText(b, W/2, 158);
+      ctx.fillText(a, W/2, 142);
+      ctx.fillText(b, W/2, 162);
     } else {
-      ctx.fillText(toast.text, W/2, 148);
+      ctx.fillText(toast.text, W/2, 154);
     }
 
     ctx.textAlign = "left";
@@ -454,9 +545,9 @@
     ctx.textAlign = "center";
     ctx.fillText("Catch the Hearts 💘", W/2, 180);
 
-    ctx.font = "600 16px system-ui";
-    ctx.fillStyle = "rgba(255,255,255,.88)";
-    ctx.fillText("Catch = sweet message • Gold = special surprise ✨", W/2, 214);
+    ctx.font = "700 15px system-ui";
+    ctx.fillStyle = "rgba(255,255,255,.90)";
+    ctx.fillText("Build streaks • Get multipliers • Find ⭐ Magnet!", W/2, 214);
 
     const bx = 70, by = 270, bw = W-140, bh = 60;
     ctx.fillStyle = "rgba(0,0,0,.28)";
@@ -478,7 +569,6 @@
   }
 
   function drawEnd() {
-    // soft romantic overlay
     ctx.save();
     ctx.fillStyle = "rgba(255,105,180,0.10)";
     ctx.fillRect(0, 0, W, H);
@@ -490,9 +580,9 @@
     ctx.textAlign = "center";
     ctx.fillText("You won 💖", W/2, 170);
 
-    ctx.font = "700 16px system-ui";
-    ctx.fillStyle = "rgba(255,255,255,.90)";
-    ctx.fillText(`Caught: ${caught}   •   Missed: ${missed}`, W/2, 208);
+    ctx.font = "800 16px system-ui";
+    ctx.fillStyle = "rgba(255,255,255,.92)";
+    ctx.fillText(`Score: ${score}   •   Best Streak: ${bestStreak}`, W/2, 208);
 
     ctx.font = "900 18px system-ui";
     ctx.fillStyle = "rgba(255,79,163,.98)";
@@ -524,7 +614,7 @@
 
   // Update
   function update(dt) {
-    // petals update always (menu too)
+    // petals
     for (const p of petals) {
       p.y += p.speed * dt;
       p.x += Math.sin(p.y * 0.02) * p.sway;
@@ -543,14 +633,22 @@
       if (p.x > W + 20) p.x = -20;
     }
 
-    // sparkles update always
+    // sparkles
     for (let i = sparkles.length - 1; i >= 0; i--) {
       const s = sparkles[i];
       s.t += dt;
       s.x += s.vx * dt;
       s.y += s.vy * dt;
-      s.vy += 520 * dt; // gravity
+      s.vy += 560 * dt;
       if (s.t >= s.life) sparkles.splice(i, 1);
+    }
+
+    // float texts
+    for (let i = floatTexts.length - 1; i >= 0; i--) {
+      const f = floatTexts[i];
+      f.t += dt;
+      f.y += f.vy * dt;
+      if (f.t >= f.life) floatTexts.splice(i, 1);
     }
 
     if (state !== "play") {
@@ -566,7 +664,12 @@
       return;
     }
 
-    // spawn hearts
+    // magnet countdown
+    if (magnetTime > 0) {
+      magnetTime = Math.max(0, magnetTime - dt);
+    }
+
+    // spawn drops (faster over time)
     const progress = 1 - (timeLeft / DURATION);
     const spawnEvery = clamp(
       SPAWN_SLOW - progress * (SPAWN_SLOW - SPAWN_FAST),
@@ -577,7 +680,7 @@
     lastSpawn += dt * 1000;
     if (lastSpawn >= spawnEvery) {
       lastSpawn = 0;
-      spawnHeart();
+      spawnDrop();
     }
 
     // player move
@@ -594,40 +697,76 @@
     }
     player.x = clamp(player.x, 40, W-40);
 
-    // update hearts
-    const catchY = player.y - 22;
+    // update drops
+    const catchY = player.y - 28;
 
     for (let i = hearts.length - 1; i >= 0; i--) {
       const h = hearts[i];
 
+      // trail
       h.trail.unshift({ x: h.x, y: h.y });
       if (h.trail.length > 3) h.trail.pop();
 
+      // magnet effect
+      if (magnetTime > 0 && h.type === "heart") {
+        const dxToPlayer = player.x - h.x;
+        const pull = clamp(Math.abs(dxToPlayer) / 180, 0.15, 1);
+        h.x += dxToPlayer * pull * dt * 2.2; // pull strength
+      }
+
       h.y += h.vy * dt;
 
+      // collision (based on size)
+      const hitX = h.size * 0.80;
+      const hitY = h.size * 0.55;
       const dx = Math.abs(h.x - player.x);
       const dy = Math.abs(h.y - catchY);
 
-      // collision tuned for big hearts
-      if (dx < 65 && dy < 45) {
+      if (dx < hitX && dy < hitY) {
         hearts.splice(i, 1);
 
-        // NEW: gold bonus
-        if (h.kind === "gold") caught += (1 + GOLD_BONUS);
-        else caught += 1;
+        // scoring & streak
+        streak += 1;
+        bestStreak = Math.max(bestStreak, streak);
+        calcMultiplier();
 
-        popSound(h.kind);
-        spawnSparkles(h.x, h.y, h.kind);
+        // points
+        let basePoints = 10;
 
-        if (h.kind === "gold") {
+        if (h.type === "magnet") {
+          magnetTime = MAGNET_SECONDS;
+          basePoints = 25;
+          popSound("magnet");
+          spawnSparkles(h.x, h.y, "magnet");
+          showToast(MAGNET_MESSAGE, "catch");
+          addFloatText("+25 ⭐", h.x, h.y - 8, "rgba(180,255,255,.95)");
+        } else if (h.kind === "gold") {
+          basePoints = 30;
+          popSound("gold");
+          spawnSparkles(h.x, h.y, "gold");
           showToast(GOLD_MESSAGE, "catch");
+          addFloatText("+30 ✨", h.x, h.y - 8, "rgba(255,230,160,.98)");
         } else {
+          popSound("pink");
+          spawnSparkles(h.x, h.y, "pink");
           const msg = CATCH_MESSAGES[msgIndex % CATCH_MESSAGES.length];
           msgIndex++;
           showToast(msg, "catch");
+          addFloatText(`+${Math.round(10 * multiplier)}`, h.x, h.y - 8, "rgba(255,255,255,.96)");
         }
 
-        // tiny “satisfy” micro-shake
+        const gained = Math.round(basePoints * multiplier);
+        score += gained;
+
+        // counts
+        caught += 1;
+
+        // combo hype
+        if (streak === 5) addFloatText("NICE! 🔥", W/2, 220, "rgba(255,79,163,.95)");
+        if (streak === 10) addFloatText("PERFECT! 💘", W/2, 220, "rgba(255,79,163,.95)");
+        if (streak === 15) addFloatText("UNSTOPPABLE! 😈", W/2, 220, "rgba(255,79,163,.95)");
+
+        // micro-shake
         canvas.style.transform = "translateY(1px)";
         setTimeout(() => (canvas.style.transform = "translateY(0)"), 70);
 
@@ -635,10 +774,17 @@
       }
 
       // miss
-      if (h.y >= GROUND_Y + 10) {
+      if (h.y >= GROUND_Y + 18) {
         hearts.splice(i, 1);
         missed++;
-        showToast(MISS_MESSAGE, "miss");
+
+        // reset streak (addictive consequence)
+        if (streak >= 5) addFloatText("Streak lost 😭", W/2, 220, "rgba(255,255,255,.9)");
+        streak = 0;
+        calcMultiplier();
+
+        // don’t spam miss toast every time; only sometimes
+        if (missed % 2 === 1) showToast(MISS_MESSAGE, "miss");
       }
     }
 
@@ -653,24 +799,54 @@
     drawBackgroundCover();
     drawPetals();
 
-    // hearts
+    // drops
     for (const h of hearts) {
-      const fill = HEART_FILLS[h.kind] || "#ff4fa3";
-
       // trail
       for (let t = h.trail.length - 1; t >= 0; t--) {
         const p = h.trail[t];
-        const a = (t / h.trail.length) * 0.10;
+        const a = (t / h.trail.length) * 0.08;
         ctx.save();
         ctx.globalAlpha = a;
-        drawHeart(p.x, p.y, (h.size/22) * 0.55, fill);
+        if (h.type === "magnet") {
+          // simple star-ish dot trail
+          ctx.fillStyle = "rgba(180,255,255,1)";
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, Math.max(2, h.size * 0.12), 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          const fill = HEART_FILLS[h.kind] || HEART_FILLS.pink;
+          drawHeartPx(p.x, p.y, h.size * 0.55, fill, false);
+        }
         ctx.restore();
       }
 
-      drawHeart(h.x, h.y, h.size/22, fill);
+      // main
+      if (h.type === "magnet") {
+        // ⭐ magnet drop (a glowing star-like dot + ring)
+        ctx.save();
+        ctx.globalAlpha = 0.95;
+        ctx.fillStyle = "rgba(180,255,255,1)";
+        ctx.shadowColor = "rgba(180,255,255,1)";
+        ctx.shadowBlur = 18;
+        ctx.beginPath();
+        ctx.arc(h.x, h.y, h.size * 0.26, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 0.55;
+        ctx.strokeStyle = "rgba(180,255,255,1)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(h.x, h.y, h.size * 0.40, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        const fill = HEART_FILLS[h.kind] || HEART_FILLS.pink;
+        // ✅ bigger & clean heart
+        drawHeartPx(h.x, h.y, h.size, fill, true);
+      }
     }
 
-    // sparkles (pop)
+    // sparkles
     drawSparkles();
 
     // player sprite
@@ -682,6 +858,7 @@
     if (state === "play") drawTopHUD();
     if (state === "end") drawEnd();
 
+    drawFloatTexts();
     drawToast();
   }
 
@@ -746,10 +923,9 @@
   canvas.addEventListener("pointerup", () => { dragging = false; });
   canvas.addEventListener("pointercancel", () => { dragging = false; });
 
-  // Keyboard (optional)
+  // Keyboard
   window.addEventListener("keydown", (e) => {
     startMusic();
-
     if (e.key === "ArrowLeft") keys.left = true;
     if (e.key === "ArrowRight") keys.right = true;
     if (e.key === "Enter" && state === "menu") { resetGame(); state="play"; }
