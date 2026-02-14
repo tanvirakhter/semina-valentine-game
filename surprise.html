@@ -1,413 +1,434 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Surprise for Semina 💘</title>
-  <meta name="theme-color" content="#ff4fa3" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Surprise for Semina 💘</title>
+<meta name="theme-color" content="#ff4fa3" />
 
-  <style>
-    :root{
-      --pink:#ff4fa3;
-      --pink2:#ff85c2;
-      --bg:#0b0b12;
-      --card:rgba(255,255,255,.08);
-      --stroke:rgba(255,255,255,.14);
-      --text:rgba(255,255,255,.92);
-      --muted:rgba(255,255,255,.72);
-      --shadow: 0 18px 55px rgba(0,0,0,.45);
-      --radius: 22px;
-    }
+<style>
+:root{
+  --pink:#ff4fa3;
+  --pink2:#ff85c2;
+  --card:rgba(255,255,255,.08);
+  --stroke:rgba(255,255,255,.14);
+  --text:rgba(255,255,255,.92);
+  --muted:rgba(255,255,255,.72);
+  --shadow: 0 18px 55px rgba(0,0,0,.45);
+  --radius: 22px;
+}
 
-    *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
-    html,body{ height:100%; margin:0; background: radial-gradient(1200px 700px at 50% -10%, rgba(255,79,163,.22), transparent 55%),
-                                        radial-gradient(900px 600px at 90% 30%, rgba(130,120,255,.16), transparent 60%),
-                                        #0b0b12;
-               color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+*{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
 
-    .wrap{
-      min-height: 100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 18px;
-    }
+html,body{
+  height:100%;
+  margin:0;
+  background:
+    radial-gradient(1200px 700px at 50% -10%, rgba(255,79,163,.22), transparent 55%),
+    radial-gradient(900px 600px at 90% 30%, rgba(130,120,255,.16), transparent 60%),
+    #0b0b12;
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+}
 
-    .phone{
-      width: min(430px, 100%);
-      border-radius: 26px;
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.20);
-      position: relative;
-    }
+.wrap{
+  min-height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
 
-    .topGlow{
-      position:absolute; inset:-60px -60px auto -60px;
-      height: 220px;
-      background: radial-gradient(circle at 50% 40%, rgba(255,79,163,.26), transparent 60%);
-      pointer-events:none;
-      filter: blur(2px);
-    }
+.phone{
+  width:min(430px,100%);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.20);
+  position:relative;
+}
 
-    header{
-      padding: 22px 18px 10px;
-      text-align:center;
-      position:relative;
-      z-index:2;
-    }
+.topGlow{
+  position:absolute;
+  inset:-60px -60px auto -60px;
+  height:220px;
+  background: radial-gradient(circle at 50% 40%, rgba(255,79,163,.26), transparent 60%);
+  pointer-events:none;
+}
 
-    .badge{
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(255,79,163,.14);
-      border: 1px solid rgba(255,79,163,.22);
-      color: rgba(255,255,255,.92);
-      font-weight: 800;
-      font-size: 13px;
-    }
+header{
+  padding:22px 18px 8px;
+  text-align:center;
+  position:relative;
+  z-index:1;
+}
 
-    h1{
-      margin: 14px 0 6px;
-      font-size: 28px;
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-    }
+.badge{
+  display:inline-flex;
+  gap:8px;
+  align-items:center;
+  padding:8px 12px;
+  border-radius:999px;
+  background: rgba(255,79,163,.14);
+  border:1px solid rgba(255,79,163,.22);
+  font-weight:800;
+  font-size:13px;
+}
 
-    .sub{
-      margin: 0 auto 14px;
-      max-width: 34ch;
-      color: var(--muted);
-      font-weight: 600;
-      font-size: 14px;
-    }
+h1{
+  margin:14px 0 6px;
+  font-size:28px;
+  letter-spacing:-0.02em;
+}
 
-    .content{
-      padding: 10px 16px 18px;
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
-      position:relative;
-      z-index:2;
-    }
+.sub{
+  margin:0 auto 6px;
+  max-width:34ch;
+  color:var(--muted);
+  font-weight:600;
+  font-size:14px;
+}
 
-    .card{
-      background: var(--card);
-      border: 1px solid var(--stroke);
-      border-radius: var(--radius);
-      padding: 16px;
-      backdrop-filter: blur(10px);
-    }
+/* ⭐ Your character animation */
+@keyframes spriteFloat {
+  0%   { transform: translateY(0) rotate(-1deg); }
+  50%  { transform: translateY(-8px) rotate(1deg); }
+  100% { transform: translateY(0) rotate(-1deg); }
+}
 
-    .cardTitle{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
+.avatarWrap{
+  display:flex;
+  justify-content:center;
+  margin-top:6px;
+}
 
-    .cardTitle h2{
-      margin:0;
-      font-size: 16px;
-      letter-spacing: -0.01em;
-    }
+.avatarWrap img{
+  width:140px;           /* adjust size here */
+  height:auto;
+  display:block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  filter: drop-shadow(0 14px 24px rgba(0,0,0,.45));
+  animation: spriteFloat 2.4s ease-in-out infinite;
+  transform-origin: 50% 85%;
+  will-change: transform;
+}
 
-    .pill{
-      font-size: 12px;
-      font-weight: 800;
-      color: rgba(255,255,255,.88);
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.12);
-      padding: 6px 10px;
-      border-radius: 999px;
-    }
+@media (prefers-reduced-motion: reduce){
+  .avatarWrap img{ animation: none; }
+}
 
-    .type{
-      font-size: 15px;
-      line-height: 1.55;
-      color: rgba(255,255,255,.90);
-      min-height: 92px;
-      white-space: pre-wrap;
-    }
+.content{
+  padding:10px 16px 18px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  position:relative;
+  z-index:1;
+}
 
-    .hint{
-      margin-top: 10px;
-      display:flex;
-      justify-content:center;
-      font-size: 12px;
-      color: rgba(255,255,255,.70);
-    }
+.card{
+  background:var(--card);
+  border:1px solid var(--stroke);
+  border-radius:var(--radius);
+  padding:16px;
+  backdrop-filter: blur(10px);
+}
 
-    .btnRow{
-      display:flex;
-      gap: 10px;
-      margin-top: 8px;
-    }
+.cardTitle{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
 
-    button{
-      appearance:none;
-      border: 0;
-      border-radius: 16px;
-      padding: 12px 14px;
-      font-weight: 900;
-      font-size: 14px;
-      cursor:pointer;
-      width: 100%;
-      color: rgba(255,255,255,.95);
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.14);
-      transition: transform .08s ease, background .2s ease;
-    }
-    button:active{ transform: scale(.98); }
+.pill{
+  font-size:12px;
+  font-weight:800;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  padding:6px 10px;
+  border-radius:999px;
+}
 
-    .primary{
-      background: linear-gradient(135deg, rgba(255,79,163,.95), rgba(255,133,194,.88));
-      border: 1px solid rgba(255,79,163,.55);
-    }
+.type{
+  font-size:15px;
+  line-height:1.55;
+  min-height:92px;
+  white-space:pre-wrap;
+}
 
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
+.hint{
+  margin-top:10px;
+  display:flex;
+  justify-content:center;
+  font-size:12px;
+  color:rgba(255,255,255,.70);
+}
 
-    .ph{
-      aspect-ratio: 1 / 1;
-      border-radius: 18px;
-      background: rgba(255,255,255,.07);
-      border: 1px dashed rgba(255,255,255,.18);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color: rgba(255,255,255,.55);
-      font-weight: 800;
-      font-size: 12px;
-      overflow:hidden;
-      position:relative;
-    }
-    .ph img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
+.btnRow{
+  display:flex;
+  gap:10px;
+  margin-top:8px;
+}
 
-    .final{
-      text-align:center;
-      padding: 18px 16px 22px;
-    }
-    .final h3{
-      margin: 0 0 6px;
-      font-size: 18px;
-      letter-spacing: -0.01em;
-    }
-    .final p{
-      margin: 0 0 14px;
-      color: rgba(255,255,255,.78);
-      font-weight: 600;
-      font-size: 14px;
-      line-height: 1.45;
-    }
+button{
+  border-radius:16px;
+  padding:12px 14px;
+  font-weight:900;
+  font-size:14px;
+  cursor:pointer;
+  width:100%;
+  color:white;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.14);
+  transition: transform .08s ease;
+}
 
-    .small{
-      font-size: 12px;
-      color: rgba(255,255,255,.65);
-      text-align:center;
-      padding-bottom: 18px;
-    }
+button:active{ transform: scale(.98); }
 
-    /* Confetti hearts */
-    .fx{
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      overflow:hidden;
-      z-index: 3;
-    }
-    .heart{
-      position:absolute;
-      font-size: 18px;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: floatUp 1.8s ease forwards;
-      filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
-    }
-    @keyframes floatUp{
-      0%{ opacity:0; transform: translateY(20px) scale(.9); }
-      10%{ opacity:1; }
-      100%{ opacity:0; transform: translateY(-240px) scale(1.2); }
-    }
+.primary{
+  background: linear-gradient(135deg,var(--pink),var(--pink2));
+}
 
-    /* Tap-to-reveal section */
-    .revealBtn{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap: 8px;
-      margin-top: 10px;
-      font-weight: 900;
-      color: rgba(255,255,255,.92);
-    }
+.final{
+  text-align:center;
+  padding:18px 16px 22px;
+}
 
-    .hidden{
-      display:none;
-    }
+.small{
+  font-size:12px;
+  color:rgba(255,255,255,.65);
+  text-align:center;
+  padding-bottom:18px;
+}
 
-  </style>
+/* ❤️ Final Love Screen */
+.loveScreen{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.92);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .6s ease;
+  z-index:999;
+}
+
+.loveScreen.show{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.loveScreen img{
+  width:260px;
+  max-width:86%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  filter: drop-shadow(0 18px 30px rgba(0,0,0,.55));
+  margin-bottom:18px;
+  animation: popIn .6s ease forwards;
+}
+
+.loveText{
+  font-size:30px;
+  font-weight:900;
+  color:#ff4fa3;
+  opacity:0;
+  animation: fadeIn 1.2s ease forwards .45s;
+  text-align:center;
+  letter-spacing:-0.01em;
+}
+
+.loveHint{
+  margin-top:10px;
+  font-size:12px;
+  font-weight:700;
+  color:rgba(255,255,255,.65);
+  opacity:0;
+  animation: fadeIn 1.2s ease forwards .8s;
+}
+
+@keyframes popIn{
+  from{ transform:scale(.72); opacity:0;}
+  to{ transform:scale(1); opacity:1;}
+}
+
+@keyframes fadeIn{
+  from{ opacity:0; transform:translateY(10px);}
+  to{ opacity:1; transform:translateY(0);}
+}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="phone">
-      <div class="topGlow"></div>
-      <div class="fx" id="fx"></div>
 
-      <header>
-        <div class="badge">💘 Surprise Unlocked</div>
-        <h1>Semina, this is for you</h1>
-        <p class="sub">Made with love — and a little bit of code 😌</p>
-      </header>
+<div class="wrap">
+  <div class="phone">
+    <div class="topGlow"></div>
 
-      <div class="content">
-        <!-- Love letter -->
-        <div class="card">
-          <div class="cardTitle">
-            <h2>💌 A little note</h2>
-            <span class="pill" id="pill">Tap to type</span>
-          </div>
-          <div class="type" id="type"></div>
+    <header>
+      <div class="badge">💘 Surprise Unlocked</div>
+      <h1>Semina, this is for you</h1>
+      <p class="sub">Made with love — and a little bit of code 😌</p>
 
-          <div class="btnRow">
-            <button id="typeBtn" class="primary">Start the Letter ✨</button>
-            <button id="skipBtn">Skip</button>
-          </div>
-
-          <div class="hint">Tip: turn your volume up 🎵</div>
-        </div>
-
-        <!-- The question -->
-        <div class="card final">
-          <h3>So… one question 😌</h3>
-          <p>Will you be my Valentine? 💖</p>
-
-          <div class="btnRow">
-            <button class="primary" id="yesBtn">YES 💘</button>
-            <button id="backBtn">Back to game</button>
-          </div>
-        </div>
-
-        <div class="small">Made by Tanvir — just for Semina ❤️</div>
+      <div class="avatarWrap">
+        <img src="tanvir.png" alt="Tanvir">
       </div>
+    </header>
+
+    <div class="content">
+      <div class="card">
+        <div class="cardTitle">
+          <strong>💌 A little note</strong>
+          <span class="pill" id="pill">Tap to type</span>
+        </div>
+
+        <div class="type" id="type"></div>
+
+        <div class="btnRow">
+          <button id="typeBtn" class="primary">Start the Letter ✨</button>
+          <button id="skipBtn">Skip</button>
+        </div>
+
+        <div class="hint">Tip: turn your volume up 🎵</div>
+      </div>
+
+      <div class="card final">
+        <h3>So… one question 😌</h3>
+        <p>Will you be my Valentine? 💖</p>
+
+        <div class="btnRow">
+          <button class="primary" id="yesBtn">YES 💘</button>
+          <button id="backBtn">Back to game</button>
+        </div>
+      </div>
+
+      <div class="small">Made with ❤️</div>
     </div>
   </div>
+</div>
 
-  <script>
-    // Optional: start the same music if you want (uses your existing music.mp3)
-    const bgMusic = new Audio("music.mp3");
-    bgMusic.loop = true;
-    bgMusic.volume = 0.35;
+<!-- ❤️ FINAL LOVE SCREEN (shows after YES) -->
+<div class="loveScreen" id="loveScreen" aria-hidden="true">
+  <img src="together.png" alt="Together">
+  <div class="loveText">I love you ❤️</div>
+  <div class="loveHint">Tap anywhere to close</div>
+</div>
 
-    let musicStarted = false;
-    function startMusic(){
-      if (musicStarted) return;
-      musicStarted = true;
-      bgMusic.play().catch(()=>{});
-    }
+<script>
+const bgMusic = new Audio("music.mp3");
+bgMusic.loop = true;
+bgMusic.volume = 0.35;
 
-    // Typewriter letter (edit this text!)
-    const letter = [
-      "Hey Semina,",
-      "",
-      "I made this little game because you make life feel lighter.",
-      "Every heart you caught is something I genuinely feel about you.",
-      "",
-      "Thank you for being you — for your kindness, your patience, and your warmth.",
-      "I’m proud of you, and I’m grateful you’re in my life.",
-      "",
-      "Happy Valentine’s Day 💖",
-      "— Tanvir"
-    ].join("\\n");
+let musicStarted=false;
+function startMusic(){
+  if(musicStarted) return;
+  musicStarted=true;
+  bgMusic.play().catch(()=>{});
+}
 
-    const typeEl = document.getElementById("type");
-    const pill = document.getElementById("pill");
-    const typeBtn = document.getElementById("typeBtn");
-    const skipBtn = document.getElementById("skipBtn");
+const letter = `Hey Semina,
 
-    let typing = false;
-    let done = false;
-    let i = 0;
-    let timer = null;
+I made this little game because you make life feel lighter.
 
-    function setPill(text){ pill.textContent = text; }
+Every heart you caught is something I genuinely feel about you.
 
-    function typeStart(){
-      startMusic();
-      if (typing || done) return;
-      typing = true;
-      setPill("Typing…");
+Every heart you caught is something I genuinely feel about you.
 
-      timer = setInterval(() => {
-        typeEl.textContent += letter[i] || "";
-        i++;
-        if (i >= letter.length) {
-          clearInterval(timer);
-          typing = false;
-          done = true;
-          setPill("Done 💘");
-        }
-      }, 18);
-    }
+Thank you for being you —
+for your kindness, your patience, and your warmth.
 
-    function typeSkip(){
-      startMusic();
+I’m proud of you, and I’m grateful you’re in my life.
+
+Happy Valentine’s Day 💖
+
+— Tanvir`;
+
+const typeEl = document.getElementById("type");
+const pill = document.getElementById("pill");
+
+let i=0, timer=null, done=false, typing=false;
+
+function typeStart(){
+  startMusic();
+  if (typing || done) return;
+  typing = true;
+  pill.textContent="Typing…";
+
+  timer=setInterval(()=>{
+    typeEl.textContent+=letter[i]||"";
+    i++;
+    if(i>=letter.length){
       clearInterval(timer);
-      typeEl.textContent = letter;
-      typing = false;
-      done = true;
-      setPill("Done 💘");
+      typing=false;
+      done=true;
+      pill.textContent="Done 💘";
     }
+  },18);
+}
 
-    typeBtn.addEventListener("click", typeStart);
-    skipBtn.addEventListener("click", typeSkip);
+function typeSkip(){
+  startMusic();
+  if (done) return;
+  clearInterval(timer);
+  typeEl.textContent=letter;
+  typing=false;
+  done=true;
+  pill.textContent="Done 💘";
+}
 
-    // Confetti hearts
-    const fx = document.getElementById("fx");
-    function burstHearts(){
-      startMusic();
-      const emojis = ["💘","💖","💗","💞","💝","✨"];
-      for (let k=0; k<26; k++){
-        const el = document.createElement("div");
-        el.className = "heart";
-        el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
-        el.style.left = (Math.random()*100) + "%";
-        el.style.bottom = "-20px";
-        el.style.animationDelay = (Math.random()*0.25) + "s";
-        el.style.fontSize = (14 + Math.random()*18) + "px";
-        fx.appendChild(el);
-        setTimeout(()=> el.remove(), 2200);
-      }
-    }
+document.getElementById("typeBtn").onclick=typeStart;
+document.getElementById("skipBtn").onclick=typeSkip;
 
-    // Buttons
-    document.getElementById("yesBtn").addEventListener("click", () => {
-      burstHearts();
-      setPill("She said YES 😭💘");
-      // Optional: show an alert too
-      setTimeout(() => {
-        alert("I love you Semina 💖");
-      }, 600);
-    });
+document.getElementById("backBtn").onclick=()=>{
+  location.href="index.html";
+};
 
-    document.getElementById("backBtn").addEventListener("click", () => {
-      window.location.href = "index.html";
-    });
+// ❤️ YES => show final love screen + hearts
+const loveScreen = document.getElementById("loveScreen");
 
-    // Start music on any tap (mobile autoplay rules)
-    document.addEventListener("pointerdown", startMusic, { once: true });
-  </script>
+function burstLoveHearts(){
+  const emojis = ["💖","💘","💞","💝","✨"];
+  for(let i=0;i<34;i++){
+    const h=document.createElement("div");
+    h.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    h.style.position="fixed";
+    h.style.left=(Math.random()*100)+"%";
+    h.style.bottom="-30px";
+    h.style.fontSize=(16+Math.random()*22)+"px";
+    h.style.opacity="0.95";
+    h.style.zIndex="1000";
+    h.style.transition="transform 2.1s ease, opacity 2.1s ease";
+    document.body.appendChild(h);
+
+    setTimeout(()=>{
+      h.style.transform = `translateY(-120vh) translateX(${(Math.random()*120-60).toFixed(0)}px)`;
+      h.style.opacity="0";
+    }, 40);
+
+    setTimeout(()=>h.remove(), 2200);
+  }
+}
+
+document.getElementById("yesBtn").onclick=()=>{
+  startMusic();
+  loveScreen.classList.add("show");
+  loveScreen.setAttribute("aria-hidden","false");
+  burstLoveHearts();
+};
+
+// Tap anywhere on love screen to close it
+loveScreen.addEventListener("pointerdown", ()=>{
+  loveScreen.classList.remove("show");
+  loveScreen.setAttribute("aria-hidden","true");
+});
+
+// Start music on any tap (mobile autoplay rules)
+document.addEventListener("pointerdown", startMusic, { once:true });
+</script>
+
 </body>
 </html>
