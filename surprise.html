@@ -22,13 +22,11 @@
 html,body{
   height:100%;
   margin:0;
-  background:
-    radial-gradient(1200px 700px at 50% -10%, rgba(255,79,163,.22), transparent 55%),
-    radial-gradient(900px 600px at 90% 30%, rgba(130,120,255,.16), transparent 60%),
-    #0b0b12;
+  background: #140914;
   color: var(--text);
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
 }
+
 
 .wrap{
   min-height:100%;
@@ -48,13 +46,6 @@ html,body{
   position:relative;
 }
 
-.topGlow{
-  position:absolute;
-  inset:-60px -60px auto -60px;
-  height:240px;
-  background: radial-gradient(circle at 50% 40%, rgba(255,79,163,.26), transparent 60%);
-  pointer-events:none;
-}
 
 header{
   padding:22px 18px 10px;
@@ -107,20 +98,26 @@ h1{
 .heroChar::before{
   content:"";
   position:absolute;
-  width: 240px;
-  height: 160px;
+  width: 180px;
+  height: 180px;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -48%);
-  background:
-    radial-gradient(circle at 50% 55%, rgba(255,79,163,.26), rgba(255,79,163,.06) 55%, transparent 75%),
-    radial-gradient(circle at 48% 52%, rgba(130,120,255,.18), transparent 70%);
-  filter: blur(6px);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255,79,163,0.35) 0%,
+    rgba(255,79,163,0.15) 35%,
+    rgba(255,79,163,0.05) 55%,
+    transparent 75%
+  );
+  filter: blur(10px);
+  opacity: 0.9;
   pointer-events:none;
 }
 
 .heroChar img{
-  width: 150px;            /* bigger */
+  width: 180px;            /* bigger */
   height:auto;
   display:block;
   image-rendering: pixelated;
@@ -259,7 +256,7 @@ button:active{ transform: scale(.98); }
     <header>
       <div class="badge">💘 Surprise Unlocked</div>
       <h1>Semina, this is for you</h1>
-      <p class="sub">Made with love — and a little bit of code 😌</p>
+      <p class="sub">Made with love and a little bit of code 😌</p>
 
       <div class="heroChar">
         <img src="tanvir.png" alt="Tanvir">
@@ -298,7 +295,7 @@ button:active{ transform: scale(.98); }
         <button id="backBtn">Back to game</button>
       </div>
 
-      <div class="small">Made with ❤️</div>
+      <div class="small">Tanvir made it with ❤️</div>
     </div>
   </div>
 </div>
@@ -330,17 +327,10 @@ function startMusic(){
 }
 
 const letter = `Hey Semina,
-
-I made this little game because you make life feel lighter.
-Every heart you caught is something I genuinely feel about you.
-
-Thank you for being you —
-for your kindness, your patience, and your warmth.
-I’m proud of you, and I’m grateful you’re in my life.
-
+I made this little game because you make life feel lighter. Every heart you catch is something I truly feel about you. You are my home, the place where I feel calm and happy no matter what.
+Thank you for being you, for your kindness, your patience, and your warmth. I’m proud of you, and I’m so grateful that you’re in my life.
 Happy Valentine’s Day 💖
-
-— Tanvir`;
+- Tanvir`;
 
 const typeEl = document.getElementById("type");
 const pill = document.getElementById("pill");
